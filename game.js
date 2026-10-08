@@ -13,6 +13,7 @@ var EVENTS = ZZ_EVENTS;
 var SKIP_LINES = ZZ_SKIP_LINES;
 var AFTER_MONOLOGUES = ZZ_AFTER_MONOLOGUES;
 var SKIP_LONGING = ZZ_SKIP_LONGING;
+var ABSENT_SPRING = ZZ_ABSENT_SPRING;
 
 var BG_ACTS = {
   grandpa:[
@@ -125,7 +126,8 @@ function fresh(){
     }),
     backgroundEvents: [],
     interactionLog: [],
-    dayAfterShown: new Set()
+    dayAfterShown: new Set(),
+    springAbsent: {}
   };
 }
 function save(){ try{ localStorage.setItem(STORE, JSON.stringify({g:G,cfg:cfg})); }catch(e){} }
@@ -146,6 +148,7 @@ function load(){
     if(!G.offer || typeof G.offer !== "object") G.offer = {};
     if(!Array.isArray(G.backgroundEvents)) G.backgroundEvents = [];
     if(!Array.isArray(G.interactionLog)) G.interactionLog = [];
+    if(!G.springAbsent || typeof G.springAbsent !== "object") G.springAbsent = {};
     G.dayAfterShown = new Set();
     G.chars.forEach(function(c){
       delete c.len; delete c.cost;
@@ -215,6 +218,13 @@ function pickReunion(c){
 }
 function pickAmbient(){
   var alive = aliveList().length;
+  
+  // Spring Festival absent characters' ambient text
+  if(G.springAbsentList && G.springAbsentList.length > 0 && Math.random() < 0.4){
+    var absent = G.springAbsentList[Math.floor(Math.random() * G.springAbsentList.length)];
+    return pickNoRepeat(absent.ambient, "amb_absent_" + absent.id, 3);
+  }
+  
   if(isLastDay()) return pickNoRepeat(AMBIENT.leaving, "amb_leave", 4);
   if(G.lastGone){
     // 存活越少，lost 权重越高
@@ -241,6 +251,10 @@ function eventBody(ev){
 function enterBefore(){
   G.interactionLog = [];
   var ev = evNow();
+  
+  // Process Spring Festival absent characters
+  processSpringAbsent();
+  
   $("before-title").textContent = ev.name;
   $("before-text").textContent = aliveList().length === 0
     ? "院子里没有人了。"
@@ -254,6 +268,46 @@ function enterBefore(){
   $("before-sub").textContent = sub;
   renderDebug(); save();
   show("v-before");
+}
+
+function processSpringAbsent(){
+  var ev = evNow();
+  if(ev.name !== "春节") return;
+  
+  // Initialize springAbsent for new characters
+  ABSENT_SPRING.forEach(function(a){
+    if(!G.springAbsent[a.id]){
+      G.springAbsent[a.id] = { missed: 0, returned: false };
+    }
+  });
+  
+  // Determine who returns this year
+  var returned = [];
+  ABSENT_SPRING.forEach(function(a){
+    var state = G.springAbsent[a.id];
+    if(state.returned) return; // Already returned in a previous year
+    
+    // Calculate return probability
+    var chance = a.baseChance + state.missed * a.accel;
+    chance = Math.min(0.6, chance); // Cap at 60%
+    
+    if(Math.random() < chance){
+      state.returned = true;
+      returned.push(a);
+    } else {
+      state.missed++;
+    }
+  });
+  
+  // Store returned characters for later use
+  G.springReturned = returned;
+  
+  // Filter G.chars to only include present characters
+  // (All CAST members are present for Spring Festival, absent ones are extra)
+  // No filtering needed for CAST, but we track who's absent for display
+  G.springAbsentList = ABSENT_SPRING.filter(function(a){
+    return !G.springAbsent[a.id].returned;
+  });
 }
 
 function skipVisit(){
@@ -343,8 +397,17 @@ function logBeat(name, lines, dedupeKey){
 function startDay(){
   drawOffers();
   G.dayAfterShown = new Set();
-  $("visit-log").innerHTML =
-    '<p class="day">' + (isLastDay() ? "最后一天。" : "第 " + G.d + " 天。") + "</p>";
+  var dayText = '<p class="day">' + (isLastDay() ? "最后一天。" : "第 " + G.d + " 天。") + "</p>";
+  
+  // Show reunion text for returned characters on first day of Spring Festival
+  if(G.d === 1 && G.springReturned && G.springReturned.length > 0){
+    G.springReturned.forEach(function(a){
+      var reunionText = a.reunion[Math.floor(Math.random() * a.reunion.length)];
+      dayText += '<div class="beat"><p style="animation-delay:0.3s">' + a.name + '——' + reunionText + '</p></div>';
+    });
+  }
+  
+  $("visit-log").innerHTML = dayText;
   renderBar(); renderSlots(); renderPeople(); renderDebug();
 }
 
@@ -496,6 +559,25 @@ function goReview(){
     title = "隔了 " + (G.awayFor - 1) + " 个假期，你回来了";
     fr = '<div class="fn">你没回来的那些假期里，发生过什么，你不知道。</div>';
   }
+  
+  // Add absent characters for Spring Festival
+  if(G.springAbsentList && G.springAbsentList.length > 0){
+    rows += '<div class="fn" style="margin-top:18px">这一次，以下的人没回来：</div>';
+    G.springAbsentList.forEach(function(a){
+      rows += '<div class="row"><span class="who">' + a.name +
+              '</span><span class="did miss">' + a.reason + '</span></div>';
+    });
+  }
+  
+  // Show returned characters
+  if(G.springReturned && G.springReturned.length > 0){
+    rows += '<div class="fn" style="margin-top:18px">这一次，以下的人回来了：</div>';
+    G.springReturned.forEach(function(a){
+      rows += '<div class="row"><span class="who">' + a.name +
+              '</span><span class="did">回来了</span></div>';
+    });
+  }
+  
   $("review-title").textContent = title;
   var bodyHtml = rows;
   if(missed.length > 0){
@@ -577,13 +659,26 @@ function enterRoster(){
     d.innerHTML = '<div class="st"></div><div class="sn">' + c.name + '</div><div class="bowl"></div>';
     box.appendChild(d);
   });
+  
+  // Add empty seats for absent Spring Festival characters
+  if(G.springAbsentList && G.springAbsentList.length > 0){
+    G.springAbsentList.forEach(function(a){
+      var d = document.createElement("div");
+      d.className = "seat empty";
+      d.innerHTML = '<div class="st"></div><div class="sn">' + a.name + '</div><div class="bowl"></div>';
+      box.appendChild(d);
+    });
+  }
 
   var left = aliveList(), note, quiet = false;
-  if(left.length === G.chars.length){
+  if(left.length === G.chars.length && (!G.springAbsentList || G.springAbsentList.length === 0)){
     note = "这一次，人都还在。";
   }else{
-    note = G.chars.filter(function(c){ return c.gone; })
-                   .map(function(c){ return c.name; }).join("、") + "不在。";
+    var goneNames = G.chars.filter(function(c){ return c.gone; })
+                   .map(function(c){ return c.name; });
+    var absentNames = (G.springAbsentList || []).map(function(a){ return a.name; });
+    var allAbsent = goneNames.concat(absentNames);
+    note = allAbsent.join("、") + "不在。";
     quiet = true;
   }
   var el = $("roster-note");
