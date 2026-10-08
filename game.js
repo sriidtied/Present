@@ -118,7 +118,7 @@ function nameOf(id){
 function fresh(){
   return {
     day: 0, gap: 1, awayFor: 1, trips: 0, over: false, lastGone: null,
-    d: 1, daySlot: cfg.perDay, sat: {}, offer: {},
+    d: 1, daySlot: cfg.perDay, sat: {}, offer: {}, tripSat: {},
     chars: CAST.map(function(c){
       return { id:c.id, name:c.name, ageW:c.ageW,
                gone:false, lineIdx:0, specialKey:null, specialSeen:0 };
@@ -482,7 +482,7 @@ function goReview(){
               '</span><span class="did miss">已经不在</span></div>';
       return;
     }
-    var s = G.sat[c.id] || 0;
+    var s = G.tripSat[c.id] || 0;
     var tail = s > 0 ? s + " 次"
                      : '<span class="miss">这一次你没跟他说上话</span>';
     rows += '<div class="row"><span class="who">' + c.name +
@@ -559,6 +559,7 @@ function advance(){
   if(G.day >= cfg.total || aliveList().length === 0) G.over = true;
 
   G.backgroundEvents = generateBackgroundEvents();
+  G.tripSat = Object.assign({}, G.sat);
   G.d = 1; G.daySlot = cfg.perDay; G.sat = {}; G.offer = {};
   G.dayAfterShown = new Set(); pending = null;
 }
