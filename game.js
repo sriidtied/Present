@@ -119,7 +119,7 @@ function nameOf(id){
 function fresh(){
   return {
     day: 0, gap: 1, awayFor: 1, trips: 0, over: false, lastGone: null,
-    d: 1, daySlot: cfg.perDay, sat: {}, offer: {}, tripSat: {},
+    d: 1, daySlot: cfg.perDay, sat: {}, offer: {}, tripSat: {}, roundFirst: {},
     chars: CAST.map(function(c){
       return { id:c.id, name:c.name, ageW:c.ageW,
                gone:false, lineIdx:0, specialKey:null, specialSeen:0 };
@@ -154,6 +154,7 @@ function load(){
     if(!Array.isArray(G.backgroundEvents)) G.backgroundEvents = [];
     if(!Array.isArray(G.interactionLog)) G.interactionLog = [];
     if(!G.springAbsent || typeof G.springAbsent !== "object") G.springAbsent = {};
+    if(!G.roundFirst || typeof G.roundFirst !== "object") G.roundFirst = {};
     G.dayAfterShown = new Set();
     G.chars.forEach(function(c){
       delete c.len; delete c.cost;
@@ -431,7 +432,8 @@ function interact(id){
     return;
   }
   G.daySlot -= off.c;
-  var first = !G.sat[id];
+  var first = !G.roundFirst[id];
+  G.roundFirst[id] = true;
   G.sat[id] = (G.sat[id] || 0) + 1;
   G.offer[id] = pick(actPool(c));
 
@@ -649,7 +651,7 @@ function advance(){
 
   G.backgroundEvents = generateBackgroundEvents();
   G.tripSat = Object.assign({}, G.sat);
-  G.d = 1; G.daySlot = cfg.perDay; G.sat = {}; G.offer = {};
+  G.d = 1; G.daySlot = cfg.perDay; G.sat = {}; G.offer = {}; G.roundFirst = {};
   G.dayAfterShown = new Set(); pending = null;
 }
 
