@@ -138,6 +138,11 @@ function load(){
     var d = JSON.parse(raw);
     if(!d || !d.g || !d.g.chars || !d.g.chars.length) return false;
     G = d.g; cfg = Object.assign({}, DEFAULTS, d.cfg || {});
+    // Filter out characters no longer in CAST (e.g. bro was removed)
+    var validIds = {};
+    CAST.forEach(function(c){ validIds[c.id] = true; });
+    G.chars = G.chars.filter(function(c){ return validIds[c.id]; });
+    if(!G.chars.length) return false;
     if(typeof G.gap !== "number") G.gap = 1;
     if(typeof G.awayFor !== "number") G.awayFor = 1;
     if(typeof G.trips !== "number") G.trips = 0;
