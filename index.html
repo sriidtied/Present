@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Present</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="t">Present</div>
+    <div class="s">v2.0 · 单色极简 · 数值见调试面板</div>
+  </header>
+
+  <section id="v-intro" class="view">
+    <div class="frame">
+      <div class="center">
+        <h1>回家</h1>
+        <p>以前你觉得离家越远越好。</p>
+        <p>现在你不这么想了。</p>
+        <p>但你也不知道从什么时候开始变的。</p>
+      </div>
+      <div class="act center"><button id="btn-intro-start">开始</button></div>
+    </div>
+  </section>
+
+  <section id="v-title" class="view on">
+    <div class="frame">
+      <div class="center">
+        <h1>回家</h1>
+        <p>一年就这么几天。</p>
+        <p>你在，他们就在。</p>
+        <p>你不在的时候，时间不会等你。<br>你只能决定，这次回不回去。</p>
+      </div>
+      <div class="act center"><button id="btn-start">开始</button></div>
+    </div>
+  </section>
+
+  <section id="v-before" class="view">
+    <div class="frame">
+      <div class="center">
+        <h2 id="before-title">春节</h2>
+        <p class="big" id="before-text"></p>
+        <p class="small" id="before-sub"></p>
+      </div>
+      <div class="act center">
+        <button id="btn-go">回去</button>
+        <button id="btn-skip" class="ghost">这个假期不回</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-skip" class="view">
+    <div class="frame">
+      <div class="center"><p class="big" id="skip-text"></p></div>
+      <div class="act center"><button id="btn-skip-next" class="ghost">……</button></div>
+    </div>
+  </section>
+
+  <section id="v-visit" class="view">
+    <div class="frame">
+      <div class="bar">
+        <span id="visit-title">你在家的日子</span>
+        <span class="slotrow" id="slots"></span>
+      </div>
+      <div class="stage">
+        <div class="tbl"></div>
+        <div id="people" style="display:flex;gap:8px;position:relative;z-index:2"></div>
+      </div>
+      <div class="log" id="visit-log"></div>
+      <div class="act">
+        <button id="btn-leave" class="ghost">今天先这样</button>
+        <button id="btn-hint" class="ghost">不知道做什么</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="v-dusk" class="view">
+    <div class="frame">
+      <div class="bar"><span>散场</span><span></span></div>
+      <div class="stage" id="dusk-stage">
+        <div class="tbl"></div>
+        <div id="dusk-people" style="display:flex;gap:8px;position:relative;z-index:2"></div>
+      </div>
+      <div class="log" id="dusk-log"><p class="q">该走了。</p></div>
+      <div class="act"><button id="btn-dusk" style="display:none">该走了</button></div>
+    </div>
+  </section>
+
+  <section id="v-after" class="view">
+    <div class="frame">
+      <div class="center" style="padding-bottom:0">
+        <h2>回到城里</h2>
+      </div>
+      <div class="log" id="after-body"></div>
+      <div class="act center"><button id="btn-after" class="ghost">……</button></div>
+    </div>
+  </section>
+
+  <section id="v-review" class="view">
+    <div class="frame">
+      <div class="center" style="padding-bottom:0">
+        <h2 id="review-title">这一次回家，你在场的日子</h2>
+      </div>
+      <div class="review" id="review-body"></div>
+      <div class="act center"><button id="btn-next">下一次</button></div>
+    </div>
+  </section>
+
+  <section id="v-review-back" class="view">
+    <div class="frame">
+      <div class="center" style="padding-bottom:0">
+        <h2>你不在的时候</h2>
+      </div>
+      <div class="review" id="review-back-body"></div>
+      <div class="act center"><button id="btn-back-next">回到现在</button></div>
+    </div>
+  </section>
+
+  <section id="v-roster" class="view">
+    <div class="frame">
+      <div class="center" style="padding-bottom:0">
+        <h2 id="roster-title">下一次</h2>
+      </div>
+      <div class="roster" id="roster"></div>
+      <div class="log" style="border:none;border-top:1px solid var(--ink);min-height:auto;max-height:none">
+        <p id="roster-note" class="q"></p>
+      </div>
+      <div class="act center"><button id="btn-again">回去</button></div>
+    </div>
+  </section>
+
+  <section id="v-end" class="view">
+    <div class="frame">
+      <div class="end-wrap">
+        <p class="e1" id="end-line"></p>
+        <p class="e2" id="end-stat"></p>
+        <p class="e3">这里是结尾。没有下一次了。</p>
+      </div>
+      <div class="act center"><button id="btn-restart" class="ghost">再看一遍</button></div>
+    </div>
+  </section>
+
+  <details id="dbg">
+    <summary>调试面板（正式版删除）</summary>
+    <div class="dbgrid">
+      <label>每天可用时段（早/午/晚）
+        <input type="number" id="cfg-perday" min="1" max="8" step="1">
+      </label>
+      <label>整部作品的局数（不显示给玩家）
+        <input type="number" id="cfg-total" min="4" max="40" step="1">
+      </label>
+      <label>前几轮绝对安全（任何人不会离开）
+        <input type="number" id="cfg-safe" min="0" max="10" step="1">
+      </label>
+      <label>安全期后的基础离开概率（每人每轮）
+        <input type="number" id="cfg-leave" min="0" max="1" step="0.01">
+      </label>
+      <label>时间加速度（每过一轮，概率累加多少）
+        <input type="number" id="cfg-accel" min="0" max="1" step="0.01">
+      </label>
+    </div>
+    <div><button id="btn-reset" class="ghost">清空存档，重开</button></div>
+    <table id="dbg-table"></table>
+    <div class="fn">
+      <b>耗时属于事件，不属于人。</b>每天为每个在场的人抽一件「今天想做的事」，
+      同一个人今天可能只要一会儿，明天要一整天。能做的事还会随主线收窄——
+      下棋、去镇上、逛菜市场，会随着他变老一个个消失。
+      <br><br>
+      <b>入夜和散场都不自动推进</b>，写完那句就等你按。文字逐行浮现，不抢阅读权。
+      <br><br>
+      <b>软保底</b>：存活 ≤ 2 人时不再判定离开。这是作品边界，不是现实模拟。
+    </div>
+  </details>
+
+</div>
+
+<script src="data.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
