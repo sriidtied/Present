@@ -138,3 +138,48 @@ td.num,th.num{text-align:right}
 
 #after-body{border:1px solid var(--ink);border-top:none;
   min-height:160px;max-height:320px}
+
+/* Mobile responsive */
+@media (max-width: 600px){
+  #app{padding:16px 12px 40px}
+  header .t{font-size:18px;letter-spacing:4px}
+  header .s{font-size:10px}
+  
+  .stage{height:180px;padding:0 8px 32px}
+  .tbl{width:100%;bottom:24px}
+  
+  .p{width:64px}
+  .p .fig{height:40px}
+  .p .hd{width:12px;height:12px}
+  .p .bd{width:20px;height:22px}
+  .p .nm{font-size:10px;margin-top:5px}
+  .p .of{font-size:9px}
+  .p .cost i{width:4px;height:4px}
+  
+  .slotrow{gap:3px}
+  .sl{width:10px;height:10px}
+  
+  .log{padding:10px 12px 12px;font-size:12px;max-height:200px}
+  
+  .act{padding:10px 12px;gap:8px}
+  button{font-size:12px;padding:6px 14px}
+  
+  .center{padding:32px 16px}
+  .center h1{font-size:20px;letter-spacing:8px}
+  .center h2{font-size:14px}
+  .center p{font-size:12px}
+  
+  .roster{gap:20px;padding:24px 12px 20px}
+  .seat{width:56px}
+  .seat .st{width:18px;height:18px}
+  .seat .sn{font-size:10px}
+  
+  .review{padding:4px 14px 16px;font-size:12px}
+  .fn{font-size:10px}
+  
+  .end-wrap{padding:48px 16px 56px}
+  .end-wrap .e1{font-size:13px}
+  
+  details#dbg{padding:10px 12px}
+  .dbgrid{grid-template-columns:1fr}
+}

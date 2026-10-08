@@ -207,6 +207,8 @@ function pickState(c){
     G.dayAfterShown.add(c.id);
     return AFTER_ANY[c.id][0];
   }
+  // Clear lastGone after all "after" reactions have been shown
+  G.lastGone = null;
   return bank.main[Math.min(c.lineIdx, bank.main.length - 1)];
 }
 function pickFill(c){ return pickNoRepeat(LINES[c.id].fill, "fill_" + c.id, 5); }
@@ -565,7 +567,7 @@ function goReview(){
     rows += '<div class="fn" style="margin-top:18px">这一次，以下的人没回来：</div>';
     G.springAbsentList.forEach(function(a){
       rows += '<div class="row"><span class="who">' + a.name +
-              '</span><span class="did miss">' + a.reason + '</span></div>';
+              '</span><span class="did miss">没回来</span></div>';
     });
   }
   
